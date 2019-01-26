@@ -18,15 +18,15 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:b0aec80e77dd1f53e6f6d28150062e01f0f10e762725513bdf75c392df709647"
+  digest = "1:60f66ea7dac55a09567b7b7040af314a914bf0da696f99af04949ada4204b11a"
   name = "github.com/ic2hrmk/minish"
   packages = [
     "scheduler",
     "scheduler/beholder",
   ]
   pruneopts = "UT"
-  revision = "243fdb9bffc5b9768d6438d22fe8b65573d71982"
-  version = "v0.2.0"
+  revision = "951bc347b5e8885d429374c58d9b48bb77b1dfa3"
+  version = "v0.2.1"
 
 [[projects]]
   digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"

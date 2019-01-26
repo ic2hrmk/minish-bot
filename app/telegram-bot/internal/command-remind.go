@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"log"
 	"strconv"
 	"time"
 
@@ -10,27 +9,23 @@ import (
 )
 
 func (rcv *TelegramService) HandleRemindCommand(m *telebot.Message) {
-	rcv.logWarning("[/remind] new message")
+	if m.Payload == "" {
+		rcv.bot.Send(m.Chat, "I don't understand what should I remind 😁")
+		return
+	}
 
 	//
 	// Add message to scheduler
 	//
-	ownerID := strconv.Itoa(m.OriginalSender.ID)
+	ownerID := strconv.FormatInt(m.Chat.ID, 10)
 
 	taskID, err := rcv.beholder.AddTask(
 		scheduler.OwnerIdentifier(ownerID),
-		5 * time.Second,
+		1 * time.Second,
 		[]byte(m.Payload),
 	)
 	if err != nil {
-		rcv.logError("[/remind] failed to deploy task %s", taskID)
-		return
-	}
-
-	log.Println("-->task deployed", taskID)
-
-	if err = rcv.bot.Delete(m); err != nil {
-		rcv.logError("failed to remove message for task [taskID=%s], %s", taskID, err)
+		rcv.logError("[/remind] failed to deploy task [taskID=%s], %s", taskID, err)
 		return
 	}
 }

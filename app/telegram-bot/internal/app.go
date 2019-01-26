@@ -26,13 +26,20 @@ func NewTelegramService(
 	beholder.DEBUG = true
 
 	//
+	// Assemble service
+	//
+	service := &TelegramService{}
+	var err error
+
+	//
 	// Init. bot
 	//
-	bot, err := telebot.NewBot(telebot.Settings{
+	service.bot, err = telebot.NewBot(telebot.Settings{
 		Token: botAPIKey,
 		Poller: &telebot.LongPoller{
 			Timeout: 10 * time.Second,
 		},
+		Reporter: service.reportBotError,
 	})
 
 	if err != nil {
@@ -40,16 +47,10 @@ func NewTelegramService(
 	}
 
 	//
-	// Assemble service
-	//
-	service := &TelegramService{
-		bot:      bot,
-		beholder: beholder.NewBeholder(),
-	}
-
-	//
 	// Subscribe to scheduler events
 	//
+	service.beholder =  beholder.NewBeholder()
+
 	err = service.beholder.AttachNamedListener("telegram-bot", service.listenScheduler)
 	if err != nil {
 		return nil, err
@@ -89,6 +90,10 @@ func (rcv *TelegramService) logError(message string, params ... interface{}) {
 	log.Printf("[telegram-bot] ERROR | " + message, params...)
 }
 
+func (rcv *TelegramService) reportBotError(err error) {
+	log.Println("[telegram-bot] TELEGRAM-ERROR | ", err)
+}
+
 func (rcv *TelegramService) listenScheduler(event scheduler.Event) {
 	rcv.logWarning("[listener] new event [ownerID=%s][taskID=%s]",
 		event.Task.OwnerID, event.Task.TaskID)
@@ -99,9 +104,9 @@ func (rcv *TelegramService) listenScheduler(event scheduler.Event) {
 		return
 	}
 
-	_, err = rcv.bot.Send(&telebot.User{ID: ownerNumberID}, event.Task.Payload)
+	_, err = rcv.bot.Send(&telebot.User{ID: ownerNumberID}, string(event.Task.Payload))
 	if err != nil {
-		rcv.logError("failed to respond to owner, ", err)
+		rcv.logError("failed to respond to owner, %s", err)
 		return
 	}
 }
